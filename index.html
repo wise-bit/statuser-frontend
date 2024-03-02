@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>State Control</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+      }
+      #status {
+        font-size: 24px; /* Adjust the size as needed */
+        font-weight: bold;
+      }
+      .inactive {
+        color: #ffa500; /* Warm Orange */
+      }
+      .active {
+        color: #90ee90; /* Light Green */
+      }
+      #changeStateForm {
+        margin-top: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="currentState"></h1>
+    <button onclick="getState()">Refresh State</button>
+
+    <form id="changeStateForm" onsubmit="changeState(event)">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required />
+      <button type="submit">Change State</button>
+    </form>
+
+    <script>
+      async function getState() {
+        try {
+          const response = await fetch("/get-state");
+          const data = await response.text();
+          document.getElementById("currentState").innerText = data;
+
+          status = data.split(" ")[data.split(" ").length - 1];
+
+          if (status === "inactive") {
+            document.body.style.backgroundColor = "#FFA500"; // Warm Orange
+          } else if (status === "active") {
+            document.body.style.backgroundColor = "#90EE90"; // Light Green
+          }
+        } catch (error) {
+          console.error("Error fetching state:", error);
+        }
+      }
+
+      async function changeState(event) {
+        event.preventDefault();
+        const password = document.getElementById("password").value;
+        try {
+          const response = await fetch("/change-state", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ password }),
+          });
+          const data = await response.text();
+          alert(data);
+          getState(); // Refresh state after changing
+        } catch (error) {
+          console.error("Error changing state:", error);
+          alert("Error changing state");
+        }
+      }
+
+      // Initial state fetch
+      getState();
+    </script>
+  </body>
+</html>
